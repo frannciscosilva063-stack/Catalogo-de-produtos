@@ -61,11 +61,11 @@
           <i class="fas fa-user-alt mr-2"></i></i> Alterar Perfil
             
           </a>
-          <div class="dropdown-divider"></div>
-          <a href="?sair" class="dropdown-item">
+         <div class="dropdown-divider"></div>
+          <a href="home.php?sair=true" class="dropdown-item">
           <i class="fas fa-sign-out-alt mr-2"></i> Sair da Agenda
-            
-          </a>
+            </a>
+
           
       </li>
       <li class="nav-item">
