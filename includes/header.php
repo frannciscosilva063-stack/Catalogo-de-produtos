@@ -128,6 +128,24 @@
               </p>
             </a>
           </li>
+
+          <!-- ================== PARTE ADICIONADA (CATEGORIAS DINÂMICAS) ================== -->
+          <li class="nav-header">CATEGORIAS</li>
+          <?php
+          include_once('../config/conexao.php');
+          $sql_cat = $conect->query("SELECT * FROM tb_categorias ORDER BY nome_categoria ASC");
+          while ($categoria = $sql_cat->fetch(PDO::FETCH_OBJ)) {
+              $ativo = (isset($_GET['pagina']) && $_GET['pagina'] == 'categoria' && $_GET['id'] == $categoria->id_categoria) ? 'active' : '';
+              echo '<li class="nav-item">
+                      <a href="home.php?pagina=categoria&id='.$categoria->id_categoria.'" class="nav-link '.$ativo.'">
+                        <i class="nav-icon fas fa-tag"></i>
+                        <p>'.$categoria->nome_categoria.'</p>
+                      </a>
+                    </li>';
+          }
+          ?>
+          <!-- =========================================================================== -->
+
         </ul>
       </nav>
       <!-- /.sidebar-menu -->
