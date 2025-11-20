@@ -20,10 +20,11 @@ $acao = filter_var(isset($_GET['acao']) ? $_GET['acao'] : 'bemvindo', FILTER_SAN
 
 // Definir caminhos em variáveis
 $paginas = [
-    'bemvindo' => 'conteudo/cadastro_contato.php',
+    'bemvindo' => 'conteudo/cadastro_produto.php',
     'editar' => 'conteudo/update_contato.php',
     'perfil' => 'conteudo/perfil.php',
     'relatorio' => 'conteudo/relatorio.php'
+    ,'categoria' => 'conteudo/categoria.php'
 ];
 
 // Verificar se a ação existe no array, caso contrário, usar a página padrão

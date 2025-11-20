@@ -1,115 +1,100 @@
--- phpMyAdmin SQL Dump
--- version 5.1.1deb5ubuntu1
--- https://www.phpmyadmin.net/
---
--- Host: localhost:3306
--- Tempo de geração: 18/06/2024 às 13:14
--- Versão do servidor: 8.0.37-0ubuntu0.22.04.3
--- Versão do PHP: 8.1.2-1ubuntu2.17
+CREATE DATABASE bd_produtos;
+USE bd_produtos;
+-- Cria o banco e usa ele
+DROP DATABASE IF EXISTS bd_loja;
+CREATE DATABASE bd_loja CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE bd_loja;
 
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-START TRANSACTION;
-SET time_zone = "+00:00";
+-- 1. Tabela de Usuários
+CREATE TABLE tb_user (
+    id_user INT AUTO_INCREMENT PRIMARY KEY,
+    foto_user VARCHAR(200) DEFAULT 'avatar_padrao.png',
+    nome_user VARCHAR(100) NOT NULL,
+    email_user VARCHAR(150) UNIQUE NOT NULL,
+    senha_user VARCHAR(255) NOT NULL,
+    nivel ENUM('admin','vendedor','gerente') DEFAULT 'vendedor',
+    status ENUM('ativo','inativo') DEFAULT 'ativo',
+    data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
 
+-- 2. Categorias (sem FK temporariamente para não dar erro)
+CREATE TABLE tb_categorias (
+    id_categoria INT AUTO_INCREMENT PRIMARY KEY,
+    nome_categoria VARCHAR(100) NOT NULL UNIQUE,
+    descricao_categoria TEXT,
+    id_user INT NOT NULL,
+    data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
 
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
+-- 3. Produtos
+CREATE TABLE tb_produtos (
+    id_produto INT AUTO_INCREMENT PRIMARY KEY,
+    codigo_barra VARCHAR(50) UNIQUE,
+    nome_produto VARCHAR(200) NOT NULL,
+    descricao_produto TEXT,
+    preco_custo DECIMAL(10,2) DEFAULT 0.00,
+    preco_venda DECIMAL(10,2) NOT NULL,
+    foto_produto VARCHAR(200) DEFAULT 'produto-sem-foto.jpg',
+    id_categoria INT NOT NULL,
+    id_user INT NOT NULL,
+    status ENUM('ativo','inativo') DEFAULT 'ativo',
+    data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
 
---
--- Banco de dados: `new_agenda`
---
+-- 4. Estoque
+CREATE TABLE tb_estoque (
+    id_movimento INT AUTO_INCREMENT PRIMARY KEY,
+    id_produto INT NOT NULL,
+    tipo_movimento ENUM('entrada','saida','ajuste') NOT NULL,
+    quantidade INT NOT NULL,
+    motivo VARCHAR(255),
+    id_user INT NOT NULL,
+    data_movimento DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
 
--- --------------------------------------------------------
+-- 5. View estoque atual
+CREATE OR REPLACE VIEW vw_estoque_atual AS
+SELECT 
+    p.id_produto,
+    p.nome_produto,
+    p.preco_venda,
+    c.nome_categoria,
+    COALESCE(SUM(CASE WHEN e.tipo_movimento = 'entrada' THEN e.quantidade ELSE -e.quantidade END), 0) AS estoque_atual
+FROM tb_produtos p
+LEFT JOIN tb_estoque e ON p.id_produto = e.id_produto
+LEFT JOIN tb_categorias c ON p.id_categoria = c.id_categoria
+WHERE p.status = 'ativo'
+GROUP BY p.id_produto;
 
---
--- Estrutura para tabela `tb_contatos`
---
+-- ===================================
+-- APENAS O USUÁRIO ADMIN
+-- ===================================
+INSERT INTO tb_user (nome_user, email_user, senha_user, nivel, status) VALUES
+('Administrador', 'admin@loja.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin', 'ativo');
 
-CREATE TABLE `tb_contatos` (
-  `id_contatos` int NOT NULL,
-  `nome_contatos` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `fone_contatos` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `email_contatos` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `foto_contatos` varchar(254) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `id_user` int DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+-- Senha do usuário acima = 123456
 
---
--- Despejando dados para a tabela `tb_contatos`
---
+SELECT 'USUÁRIO CRIADO COM SUCESSO - LOGIN: admin@loja.com / SENHA: 123456' AS Status;
 
-INSERT INTO `tb_contatos` (`id_contatos`, `nome_contatos`, `fone_contatos`, `email_contatos`, `foto_contatos`, `id_user`) VALUES
-(24, 'Leandro Costa', '85991446499', 'leandro@gmail.com', '6671adc5b0274.jpg', 12),
-(25, 'Maria Ester', '88998654321', 'maria@yahoo.com.br', '6671b0a1c2a98.jpg', 11);
-
--- --------------------------------------------------------
-
---
--- Estrutura para tabela `tb_user`
---
-
-CREATE TABLE `tb_user` (
-  `id_user` int NOT NULL,
-  `foto_user` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `nome_user` varchar(80) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `email_user` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `senha_user` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Despejando dados para a tabela `tb_user`
---
-
-INSERT INTO `tb_user` (`id_user`, `foto_user`, `nome_user`, `email_user`, `senha_user`) VALUES
-(11, '6671a58f7d486.jpg', 'Leandro Costa', 'leandro@gmail.com', '$2y$10$oJtpLVHZVymX224N2dfM.ud14mLImZtCJKQMl.IRQIrWT1NljcO3q'),
-(12, '6671a859b1046.jpg', 'Ana', 'ana@gmail.com', '$2y$10$/NMHwdnJ6wzjsc3lNDzu6ejxqFEzMNz4ajrXKSDPxjEJv4lXKDZGS');
-
---
--- Índices para tabelas despejadas
---
-
---
--- Índices de tabela `tb_contatos`
---
-ALTER TABLE `tb_contatos`
-  ADD PRIMARY KEY (`id_contatos`),
-  ADD KEY `fk_id_usuario` (`id_user`);
-
---
--- Índices de tabela `tb_user`
---
-ALTER TABLE `tb_user`
-  ADD PRIMARY KEY (`id_user`);
-
---
--- AUTO_INCREMENT para tabelas despejadas
---
-
---
--- AUTO_INCREMENT de tabela `tb_contatos`
---
-ALTER TABLE `tb_contatos`
-  MODIFY `id_contatos` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
-
---
--- AUTO_INCREMENT de tabela `tb_user`
---
-ALTER TABLE `tb_user`
-  MODIFY `id_user` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
-
---
--- Restrições para tabelas despejadas
---
-
---
--- Restrições para tabelas `tb_contatos`
---
-ALTER TABLE `tb_contatos`
-  ADD CONSTRAINT `fk_id_usuario` FOREIGN KEY (`id_user`) REFERENCES `tb_user` (`id_user`) ON DELETE CASCADE ON UPDATE CASCADE;
-COMMIT;
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+INSERT INTO tb_categorias (nome_categoria, id_user) VALUES
+('Eletrônicos',1),
+('Bebidas',1),
+('Roupas',1),
+('Calçados',1),
+('Bolsas',1),
+('Relógios',1),
+('Perfumes',1),
+('Maquiagem',1),
+('Eletrodomésticos',1),
+('Móveis',1),
+('Decoração',1),
+('Esportes',1),
+('Suplementos',1),
+('Livros',1),
+('Papelaria',1),
+('Brinquedos',1),
+('Pet Shop',1),
+('Ferramentas',1),
+('Jardim',1),
+('Automotivo',1),
+('Alimentos',1);

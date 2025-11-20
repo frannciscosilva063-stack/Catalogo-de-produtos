@@ -3,7 +3,7 @@
 if (!defined('DB_CONFIG')) {
     define('DB_CONFIG', [
         'host' => 'localhost',
-        'dbname' => 'bd_cp',
+        'dbname' => 'bd_produtos',
         'user' => 'root',
         'pass' => 'admin'
     ]);
