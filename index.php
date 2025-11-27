@@ -1,269 +1,310 @@
 <?php
-  session_start();
+session_start();
 
-  // redireciona se já logado
-  if (isset($_SESSION['loginUser']) && isset($_SESSION['senhaUser'])) {
-      header("Location: paginas/home.php");
-      exit;
-  }
+// redireciona se já logado
+if (isset($_SESSION['loginUser']) && isset($_SESSION['id_user'])) {
+    header("Location: paginas/home.php");
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Catálogo de Produtos | Login</title>
+  <title>Sistema de Produtos | Login</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="plugins/fontawesome-free/css/all.min.css">
-  <link rel="stylesheet" href="plugins/icheck-bootstrap/icheck-bootstrap.min.css">
   <link rel="stylesheet" href="dist/css/adminlte.min.css">
   <style>
-    /* Layout split */
-    :root{
-      --blue-700:#0b2b66;
-      --blue-500:#152b8f;
-      --accent:#0a4fe0;
+    :root {
+      --primary-color: #007bff;
+      --primary-dark: #0056b3;
+      --text-dark: #333;
+      --text-light: #666;
     }
-    html,body{height:100%;}
-    body{
-      margin:0;
-      font-family: "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;
-      background:#f3f6fb;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:20px;
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
-    .split-wrap{
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f8f9fa;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .login-container {
       width: 100%;
-      max-width: 980px;
-      height: 560px;
-      display:flex;
-      border-radius:12px;
-      overflow:hidden;
-      box-shadow:0 18px 50px rgba(10,30,60,0.25);
-      background:#fff;
+      max-width: 400px;
     }
-    .left-panel{
-      flex:1;
-      background: linear-gradient(180deg, var(--blue-700), var(--blue-500));
-      color:#fff;
-      padding:48px 36px;
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      position:relative;
+    
+    .login-card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      overflow: hidden;
     }
-    .left-panel h1{
-      font-size:34px;
-      margin:0 0 10px 0;
-      letter-spacing:0.6px;
+    
+    .card-header {
+      background: var(--primary-color);
+      color: white;
+      padding: 30px 20px;
+      text-align: center;
     }
-    .left-panel p.lead{
-      font-size:20px;
-      margin:0 0 18px 0;
-      opacity:0.95;
+    
+    .card-header h1 {
+      font-size: 1.8rem;
+      margin-bottom: 5px;
     }
-    /* Decorative circles */
-    .left-panel::before,
-    .left-panel::after{
-      content:'';
-      position:absolute;
-      border-radius:50%;
-      opacity:0.06;
-      pointer-events:none;
+    
+    .card-header p {
+      opacity: 0.9;
+      font-size: 0.9rem;
     }
-    .left-panel::before{
-      width:200px;height:200px;
-      right: -60px; top: -40px;
-      background: #ffffff;
+    
+    .card-body {
+      padding: 30px;
     }
-    .left-panel::after{
-      width:140px;height:140px;
-      left: -40px; bottom: -40px;
-      background:#ffffff;
+    
+    .form-group {
+      margin-bottom: 20px;
     }
-
-    .right-panel{
-      width:420px;
-      background:#ffffff;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:36px;
+    
+    .form-control {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 1rem;
+      transition: border-color 0.3s;
     }
-    .card-login{
-      width:100%;
-      max-width:360px;
+    
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
     }
-    .card-login .card-body{
-      padding:28px;
+    
+    .form-options {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
     }
-    .card-login .card-title{
-      font-weight:600;
-      margin-bottom:8px;
-      color:#192034;
-      text-align:center;
-      font-size:20px;
+    
+    .checkbox-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
-    .form-control{
-      border-radius:8px;
-      height:44px;
-      border:1px solid #e6edf5;
-      box-shadow:none;
+    
+    .toggle-password {
+      background: none;
+      border: none;
+      color: var(--primary-color);
+      cursor: pointer;
+      font-size: 0.9rem;
     }
-    .btn-login{
-      background:linear-gradient(90deg,var(--accent),#00b4ff);
-      color:#fff;
-      border-radius:10px;
-      padding:10px 14px;
-      font-weight:600;
-      border:none;
-      width:100%;
+    
+    .btn-login {
+      width: 100%;
+      padding: 12px;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s;
     }
-    .small-link{font-size:13px; color:#5b6b85;}
-    .text-muted-center{text-align:center; margin-top:14px;}
-    @media(max-width:880px){
-      .split-wrap{height:auto; flex-direction:column;}
-      .right-panel{width:100%;}
-      .left-panel{padding:28px; order:2;}
-      .right-panel{order:1; padding:24px;}
+    
+    .btn-login:hover {
+      background: var(--primary-dark);
+    }
+    
+    .register-link {
+      text-align: center;
+      margin-top: 20px;
+      color: var(--text-light);
+    }
+    
+    .register-link a {
+      color: var(--primary-color);
+      text-decoration: none;
+    }
+    
+    .alert {
+      padding: 12px 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+    }
+    
+    .alert-success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    
+    .alert-danger {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    
+    .alert-warning {
+      background: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeaa7;
     }
   </style>
 </head>
 <body>
-  <div class="split-wrap">
-    <div class="left-panel">
-      <h1>Hello!</h1>
-      <p class="lead">Have a<br><strong style="font-size:28px;letter-spacing:0.8px;">GOOD DAY</strong></p>
-      <p style="max-width:320px; opacity:0.9;">Bem-vindo ao Catálogo de Produtos — gerencie seus produtos com rapidez e segurança.</p>
-    </div>
-
-    <div class="right-panel">
-      <div class="card card-login">
-        <div class="card-body">
-          <h3 class="card-title">Login</h3>
-
-          <form action="" method="post" novalidate>
-            <div class="form-group">
-              <input type="email" name="email" class="form-control" placeholder="E-mail" required autofocus>
-            </div>
-            <div class="form-group">
-              <input id="senha" type="password" name="senha" class="form-control" placeholder="Senha" required>
-            </div>
-
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-              <div>
-                <input type="checkbox" id="lembrar" name="lembrar">
-                <label for="lembrar" class="small-link"> Lembrar-me</label>
-              </div>
-              <div>
-                <a href="#" id="toggleSenha" class="small-link"><i class="fas fa-eye"></i> Mostrar</a>
-              </div>
-            </div>
-
-            <button type="submit" name="login" class="btn-login">Login</button>
-          </form>
-
-      <?php
-    include_once('config/conexao.php');
-                   
-// Exibir mensagens com base na ação
-if (isset($_GET['acao'])) {
-    $acao = $_GET['acao'];
-    if ($acao == 'negado') {
-        echo '<div class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button>
-        <strong>Erro ao Acessar o sistema!</strong> Efetue o login ;(</div>';
-       
-    } elseif ($acao == 'sair') {
-        echo '<div class="alert alert-warning"><button type="button" class="close" data-dismiss="alert">×</button>
-        <strong>Você acabou de sair da Agenda Eletrônica!</strong> :(</div>';
-       
-    }
-}
-
-// Processar o formulário de login
-if (isset($_POST['login'])) {
-    $login = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
-    $senha = filter_input(INPUT_POST, 'senha', FILTER_DEFAULT);
-
-    if ($login && $senha) {
-        $select = "SELECT * FROM tb_user WHERE email_user = :emailLogin";
-
-        try {
-            $resultLogin = $conect->prepare($select);
-            $resultLogin->bindParam(':emailLogin', $login, PDO::PARAM_STR);
-            $resultLogin->execute();
-
-            $verificar = $resultLogin->rowCount();
-            if ($verificar > 0) {
-                $user = $resultLogin->fetch(PDO::FETCH_ASSOC);
-
-                // Verifica a senha
-                if (password_verify($senha, $user['senha_user'])) {
-                    // Criar sessão
-                    $_SESSION['loginUser'] = $login;
-                    $_SESSION['senhaUser'] = $user['id_user'];
-                  
-
-                    echo '<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">×</button>
-                    <strong>Logado com sucesso!</strong> Você será redirecionado para a agenda :)</div>';
-
-                    header("Refresh: 5; url=paginas/home.php?acao=bemvindo");
-                } else {
-                    echo '<div class="alert alert-danger">
-                    <button type="button" class="close" data-dismiss="alert">×</button>
-                    <strong>Erro!</strong> Senha incorreta, tente novamente.</div>';
-                    header("Refresh: 7; url=index.php");
-                }
-            } else {
+  <div class="login-container">
+    <div class="login-card">
+      <div class="card-header">
+        <h1><i class="fas fa-boxes mr-2"></i>Sistema de Produtos</h1>
+        <p>Faça login para acessar o sistema</p>
+      </div>
+      
+      <div class="card-body">
+        <?php
+        include_once('config/conexao.php');
+        
+        // Exibir mensagens com base na ação
+        if (isset($_GET['acao'])) {
+            $acao = $_GET['acao'];
+            if ($acao == 'negado') {
                 echo '<div class="alert alert-danger">
-                <button type="button" class="close" data-dismiss="alert">×</button>
-                <strong>Erro!</strong> E-mail não encontrado, verifique seu login ou faça o cadastro.</div>';
-                header("Refresh: 7; url=index.php");
+                <strong><i class="fas fa-exclamation-triangle"></i> Acesso negado!</strong> Faça login para continuar.
+                </div>';
+            } elseif ($acao == 'sair') {
+                echo '<div class="alert alert-warning">
+                <strong><i class="fas fa-info-circle"></i> Logout realizado!</strong> Você saiu do sistema.
+                </div>';
             }
-        } catch (PDOException $e) {
-            // Log the error instead of displaying it to the user
-            error_log("ERRO DE LOGIN DO PDO: " . $e->getMessage());
-            echo '<div class="alert alert-danger">
-            <button type="button" class="close" data-dismiss="alert">×</button>
-            <strong>Erro!</strong> Ocorreu um erro ao tentar fazer login. Por favor, tente novamente mais tarde.</div>';
         }
-    } else {
-        echo '<div class="alert alert-danger">
-        <button type="button" class="close" data-dismiss="alert">×</button>
-        <strong>Erro!</strong> Todos os campos são obrigatórios.</div>';
-    }
-}
-      ?>
-
-
-          <p class="text-muted-center small-link">Não possui conta? <a href="cad_user.php">Cadastre-se</a></p>
+        ?>
+        
+        <form method="post" id="loginForm">
+          <div class="form-group">
+            <input type="email" name="email" class="form-control" placeholder="E-mail" required autofocus>
+          </div>
+          
+          <div class="form-group">
+            <input type="password" name="senha" id="senha" class="form-control" placeholder="Senha" required>
+          </div>
+          
+          <div class="form-options">
+            <div class="checkbox-wrapper">
+              <input type="checkbox" id="lembrar" name="lembrar">
+              <label for="lembrar">Lembrar-me</label>
+            </div>
+            <button type="button" id="toggleSenha" class="toggle-password">
+              <i class="fas fa-eye"></i> Mostrar
+            </button>
+          </div>
+          
+          <button type="submit" name="login" class="btn-login">
+            <i class="fas fa-sign-in-alt"></i> Entrar
+          </button>
+        </form>
+        
+        <div class="register-link">
+          Não tem conta? <a href="cad_user.php">Cadastre-se</a>
         </div>
       </div>
     </div>
   </div>
 
-<script src="plugins/jquery/jquery.min.js"></script>
-<script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-<script>
-  // Toggle mostrar/ocultar senha
-  document.getElementById('toggleSenha').addEventListener('click', function(e){
-    e.preventDefault();
-    var senha = document.getElementById('senha');
-    var icon = this.querySelector('i');
-    if (senha.type === 'password') {
-      senha.type = 'text';
-      icon.classList.remove('fa-eye');
-      icon.classList.add('fa-eye-slash');
-      this.childNodes[1].nodeValue = ' Ocultar';
-    } else {
-      senha.type = 'password';
-      icon.classList.remove('fa-eye-slash');
-      icon.classList.add('fa-eye');
-      this.childNodes[1].nodeValue = ' Mostrar';
-    }
-  });
-</script>
+  <?php
+  // Processar o formulário de login
+  if (isset($_POST['login'])) {
+      $login = trim($_POST['email']);
+      $senha = trim($_POST['senha']);
+
+      if (!empty($login) && !empty($senha)) {
+          try {
+              // Verificar se o usuário existe
+              $sql = "SELECT * FROM tb_user WHERE email_user = ? AND status = 'ativo'";
+              $stmt = $conect->prepare($sql);
+              $stmt->execute([$login]);
+              
+              if ($stmt->rowCount() > 0) {
+                  $user = $stmt->fetch(PDO::FETCH_ASSOC);
+                  
+                  // Verificar a senha
+                  if (password_verify($senha, $user['senha_user'])) {
+                      // Criar sessão
+                      $_SESSION['loginUser'] = $user['email_user'];
+                      $_SESSION['id_user'] = $user['id_user'];
+                      $_SESSION['nome_user'] = $user['nome_user'];
+                      $_SESSION['nivel_user'] = $user['nivel'];
+                      
+                      echo '<div class="alert alert-success">
+                      <strong><i class="fas fa-check-circle"></i> Login realizado!</strong> Redirecionando...
+                      </div>';
+                      
+                      echo '<script>
+                      setTimeout(function() {
+                          window.location.href = "paginas/home.php";
+                      }, 1000);
+                      </script>';
+                      
+                  } else {
+                      echo '<div class="alert alert-danger">
+                      <strong><i class="fas fa-times-circle"></i> Erro!</strong> Senha incorreta.
+                      </div>';
+                  }
+              } else {
+                  echo '<div class="alert alert-danger">
+                  <strong><i class="fas fa-user-times"></i> Erro!</strong> E-mail não encontrado ou conta inativa.
+                  </div>';
+              }
+              
+          } catch (PDOException $e) {
+              echo '<div class="alert alert-danger">
+              <strong><i class="fas fa-exclamation-triangle"></i> Erro!</strong> Problema no sistema. Tente novamente.
+              </div>';
+              error_log("Erro login: " . $e->getMessage());
+          }
+      } else {
+          echo '<div class="alert alert-danger">
+          <strong><i class="fas fa-exclamation-circle"></i> Erro!</strong> Preencha todos os campos.
+          </div>';
+      }
+  }
+  ?>
+
+  <script src="plugins/jquery/jquery.min.js"></script>
+  <script>
+    // Mostrar/ocultar senha
+    document.getElementById('toggleSenha').addEventListener('click', function() {
+      var senha = document.getElementById('senha');
+      var icon = this.querySelector('i');
+      
+      if (senha.type === 'password') {
+        senha.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+        this.innerHTML = '<i class="fas fa-eye-slash"></i> Ocultar';
+      } else {
+        senha.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+        this.innerHTML = '<i class="fas fa-eye"></i> Mostrar';
+      }
+    });
+
+    // Foco no campo email
+    document.querySelector('input[name="email"]').focus();
+  </script>
 </body>
 </html>

@@ -3,9 +3,9 @@
 if (!defined('DB_CONFIG')) {
     define('DB_CONFIG', [
         'host' => 'localhost',
-        'dbname' => 'bd_produtos',
+        'dbname' => 'bd_loja',
         'user' => 'root',
-        'pass' => 'admin'
+        'pass' => 'bdjmf'
     ]);
 }
 
