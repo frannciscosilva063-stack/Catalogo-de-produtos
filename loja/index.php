@@ -521,34 +521,6 @@
       color: var(--accent);
     }
     
-    .buy-btn {
-      background: linear-gradient(to right, var(--primary), var(--primary-dark));
-      color: white;
-      border: none;
-      border-radius: 50px;
-      padding: 10px 20px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-size: 0.9rem;
-    }
-    
-    .buy-btn:hover {
-      transform: scale(1.05);
-      box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
-    }
-    
-    .buy-btn:disabled {
-      background: var(--light-gray);
-      color: var(--gray);
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
-    
     /* Empty State */
     .empty-state {
       text-align: center;
@@ -883,10 +855,6 @@
                       <div class='product-price'>R$ " . number_format($p->preco_venda, 2, ',', '.') . "</div>
                       <div class='product-footer'>
                         <span class='stock-badge $estoque_class'>$estoque_text</span>
-                        <button class='buy-btn' " . ($p->estoque == 0 ? 'disabled' : '') . ">
-                          <i class='fas fa-cart-plus'></i>
-                          Comprar
-                        </button>
                       </div>
                     </div>
                   </div>";
