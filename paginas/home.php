@@ -18,13 +18,14 @@ include_once('../includes/header.php');
 // Sanitização de entrada
 $acao = filter_var(isset($_GET['acao']) ? $_GET['acao'] : 'bemvindo', FILTER_SANITIZE_STRING);
 
-// Definir caminhos em variáveis
+// Definir caminhos em variáveis - ADICIONEI 'lista_contatos'
 $paginas = [
     'bemvindo' => 'conteudo/cadastro_produto.php',
     'editar' => 'conteudo/update_contato.php',
     'perfil' => 'conteudo/perfil.php',
-    'relatorio' => 'conteudo/relatorio.php'
-    ,'categoria' => 'conteudo/categoria.php'
+    'relatorio' => 'conteudo/relatorio.php',
+    'categoria' => 'conteudo/categoria.php',
+    'lista_contatos' => 'conteudo/update_contato.php'
 ];
 
 // Verificar se a ação existe no array, caso contrário, usar a página padrão

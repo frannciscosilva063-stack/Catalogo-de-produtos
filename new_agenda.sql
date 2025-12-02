@@ -1,6 +1,4 @@
-CREATE DATABASE bd_produtos;
-USE bd_produtos;
--- Cria o banco e usa ele
+
 DROP DATABASE IF EXISTS bd_loja;
 CREATE DATABASE bd_loja CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE bd_loja;
@@ -98,3 +96,21 @@ INSERT INTO tb_categorias (nome_categoria, id_user) VALUES
 ('Jardim',1),
 ('Automotivo',1),
 ('Alimentos',1);
+
+-- Adicione esta tabela ao seu banco bd_loja
+CREATE TABLE tb_contatos (
+    id_contato INT AUTO_INCREMENT PRIMARY KEY,
+    nome_contato VARCHAR(100) NOT NULL,
+    telefone_contato VARCHAR(20) NOT NULL,
+    email_contato VARCHAR(150),
+    foto_contato VARCHAR(200) DEFAULT 'contato-sem-foto.jpg',
+    id_user INT NOT NULL,
+    data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_user) REFERENCES tb_user(id_user) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Inserir alguns contatos de exemplo
+INSERT INTO tb_contatos (nome_contato, telefone_contato, email_contato, id_user) VALUES
+('João Silva', '(11) 99999-9999', 'joao@email.com', 1),
+('Maria Santos', '(11) 88888-8888', 'maria@email.com', 1),
+('Carlos Oliveira', '(11) 77777-7777', 'carlos@email.com', 1);

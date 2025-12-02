@@ -1,3 +1,26 @@
+<?php
+// ============================================
+// INÍCIO - VERIFICAÇÃO DE LOGIN E CONEXÃO
+// ============================================
+// NÃO inicie session_start() - já está no header
+
+// Verificar se usuário está logado
+if (!isset($_SESSION['id_user'])) {
+    header("Location: ../../login.php");
+    exit;
+}
+
+// Definir variáveis da sessão
+$id_user = $_SESSION['id_user'];
+$nome_user = isset($_SESSION['nome_user']) ? $_SESSION['nome_user'] : 'Usuário';
+
+// Incluir conexão
+require_once('../config/conexao.php');
+// ============================================
+// FIM DA VERIFICAÇÃO
+// ============================================
+?>
+
 <!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
     <section class="content-header">
@@ -53,7 +76,7 @@
                                     <select name="id_categoria" class="form-control" required>
                                         <option value="">Selecione uma categoria...</option>
                                         <?php
-                                        // CORREÇÃO: Busca TODAS as categorias disponíveis
+                                        // Busca TODAS as categorias disponíveis
                                         try {
                                             $sql_cats = "SELECT * FROM tb_categorias ORDER BY nome_categoria ASC";
                                             $stmt_cats = $conect->query($sql_cats);
@@ -69,20 +92,18 @@
                                             }
                                         } catch (Exception $e) {
                                             echo '<option value="" disabled>--- Erro ao carregar categorias ---</option>';
-                                            error_log("Erro ao carregar categorias: " . $e->getMessage());
                                         }
                                         ?>
                                     </select>
                                     <?php if (isset($total_categorias) && $total_categorias == 0): ?>
                                         <small class="text-danger">
                                             <i class="fas fa-exclamation-triangle"></i> 
-                                            Você precisa cadastrar categorias primeiro. 
-                                            <a href="categorias.php" class="text-bold">Clique aqui para cadastrar</a>
+                                            Você precisa cadastrar categorias primeiro.
                                         </small>
                                     <?php else: ?>
                                         <small class="text-muted">
                                             <i class="fas fa-info-circle"></i> 
-                                            <?= $total_categorias ?> categorias disponíveis
+                                            <?= isset($total_categorias) ? $total_categorias : '0' ?> categorias disponíveis
                                         </small>
                                     <?php endif; ?>
                                 </div>
@@ -220,7 +241,8 @@
                                         <button type="button" class="close" data-dismiss="alert">×</button>
                                         <i class="fas fa-check-circle"></i> Produto cadastrado com sucesso!
                                       </div>';
-                                echo '<script>setTimeout(() => location.href = "produtos.php", 1800);</script>';
+                                // Redireciona para mesma página para limpar o formulário
+                                echo '<script>setTimeout(() => { window.location.reload(); }, 1500);</script>';
 
                             } catch (Exception $e) {
                                 $conect->rollBack();
@@ -256,7 +278,7 @@
                         <div class="card-header">
                             <h3 class="card-title">Produtos Recentes</h3>
                             <div class="card-tools">
-                                <a href="categorias.php" class="btn btn-sm btn-info">
+                                <a href="?acao=categoria" class="btn btn-sm btn-info">
                                     <i class="fas fa-folder-plus"></i> Gerenciar Categorias
                                 </a>
                             </div>
@@ -277,30 +299,32 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php
-                                        try {
-                                            $sql = "SELECT p.*, c.nome_categoria, COALESCE(v.estoque_atual, 0) as estoque_atual
-                                                    FROM tb_produtos p
-                                                    LEFT JOIN tb_categorias c ON p.id_categoria = c.id_categoria
-                                                    LEFT JOIN vw_estoque_atual v ON p.id_produto = v.id_produto
-                                                    WHERE p.id_user = ?
-                                                    ORDER BY p.id_produto DESC LIMIT 15";
-                                            $stmt = $conect->prepare($sql);
-                                            $stmt->execute([$id_user]);
-                                            $cont = 1;
+                                    <?php
+                                    try {
+                                        $sql = "SELECT p.*, c.nome_categoria, COALESCE(v.estoque_atual, 0) as estoque_atual
+                                                FROM tb_produtos p
+                                                LEFT JOIN tb_categorias c ON p.id_categoria = c.id_categoria
+                                                LEFT JOIN vw_estoque_atual v ON p.id_produto = v.id_produto
+                                                WHERE p.id_user = ?
+                                                ORDER BY p.id_produto DESC LIMIT 15";
+                                        $stmt = $conect->prepare($sql);
+                                        $stmt->execute([$id_user]);
+                                        $cont = 1;
 
+                                        if ($stmt->rowCount() > 0) {
                                             while ($p = $stmt->fetch(PDO::FETCH_OBJ)) {
                                                 $status_badge = $p->status == 'ativo' ? 'bg-success' : 'bg-danger';
                                                 $estoque_badge = $p->estoque_atual > 0 ? 'bg-success' : 'bg-danger';
-                                        ?>
+                                    ?>
                                                 <tr>
                                                     <td><?= $cont++ ?></td>
                                                     <td>
                                                         <img src="../img/produtos/<?= htmlspecialchars($p->foto_produto) ?>" 
                                                              class="img-circle elevation-2" 
                                                              style="width:45px;height:45px;object-fit:cover;"
-                                                             alt="<?= htmlspecialchars($p->nome_produto) ?>"
-                                                             onerror="this.src='../img/produtos/produto-sem-foto.jpg'">
+                                                            
+                                                             
+                                                             onerror="this.src='../img/avatar_p/avatar-padrao.png'">
                                                     </td>
                                                     <td>
                                                         <strong><?= htmlspecialchars($p->nome_produto) ?></strong>
@@ -321,35 +345,34 @@
                                                         </span>
                                                     </td>
                                                     <td>
-                                                        <a href="editar-produto.php?id=<?= $p->id_produto ?>" class="btn btn-sm btn-warning" title="Editar">
+                                                        <a href="?acao=editar_produto&id=<?= $p->id_produto ?>" class="btn btn-sm btn-warning" title="Editar">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
-                                                        <a href="deletar-produto.php?id=<?= $p->id_produto ?>" 
+                                                        <a href="?acao=excluir_produto&id=<?= $p->id_produto ?>" 
                                                            onclick="return confirm('Tem certeza que deseja excluir este produto permanentemente?')" 
                                                            class="btn btn-sm btn-danger" title="Excluir">
                                                             <i class="fas fa-trash"></i>
                                                         </a>
                                                     </td>
                                                 </tr>
-                                        <?php 
+                                    <?php 
                                             }
-                                            
-                                            if ($stmt->rowCount() == 0) : 
-                                        ?>
-                                                <tr>
-                                                    <td colspan="8" class="text-center py-4">
-                                                        <i class="fas fa-box-open fa-2x text-muted mb-2"></i><br>
-                                                        Nenhum produto cadastrado ainda.<br>
-                                                        <small class="text-muted">Use o formulário ao lado para cadastrar seu primeiro produto</small>
-                                                    </td>
-                                                </tr>
-                                        <?php 
-                                            endif;
-                                            
-                                        } catch (Exception $e) {
-                                            echo '<tr><td colspan="8" class="text-center text-danger">Erro ao carregar produtos: ' . htmlspecialchars($e->getMessage()) . '</td></tr>';
+                                        } else {
+                                    ?>
+                                            <tr>
+                                                <td colspan="8" class="text-center py-4">
+                                                    <i class="fas fa-box-open fa-2x text-muted mb-2"></i><br>
+                                                    Nenhum produto cadastrado ainda.<br>
+                                                    <small class="text-muted">Use o formulário ao lado para cadastrar seu primeiro produto</small>
+                                                </td>
+                                            </tr>
+                                    <?php 
                                         }
-                                        ?>
+                                        
+                                    } catch (Exception $e) {
+                                        echo '<tr><td colspan="8" class="text-center text-danger">Erro ao carregar produtos: ' . htmlspecialchars($e->getMessage()) . '</td></tr>';
+                                    }
+                                    ?>
                                     </tbody>
                                 </table>
                             </div>
