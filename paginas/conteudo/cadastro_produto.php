@@ -348,10 +348,21 @@ require_once('../config/conexao.php');
                                                         <a href="?acao=editar_produto&id=<?= $p->id_produto ?>" class="btn btn-sm btn-warning" title="Editar">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
+                                                        <?php if (isset($_GET['acao']) && $_GET['acao'] === 'excluir_produto' && isset($_GET['id'])) {
+                                                            $id_produto_excluir = (int)$_GET['id'];
+                                                            try {
+                                                                $sql_excluir = "DELETE FROM tb_produtos WHERE id_produto = ?";
+                                                                $stmt_excluir = $conect->prepare($sql_excluir);
+                                                                $stmt_excluir->execute([$id_produto_excluir]);
+                                                               
+                                                            } catch (Exception $e) {
+                                                                echo '<div class="alert alert-danger">Erro ao excluir produto: ' . htmlspecialchars($e->getMessage()) . '</div>';
+                                                            }
+                                                        } ?>
                                                         <a href="?acao=excluir_produto&id=<?= $p->id_produto ?>" 
                                                            onclick="return confirm('Tem certeza que deseja excluir este produto permanentemente?')" 
                                                            class="btn btn-sm btn-danger" title="Excluir">
-                                                            <i class="fas fa-trash"></i>
+                                                           <i class="fas fa-trash"></i>
                                                         </a>
                                                     </td>
                                                 </tr>

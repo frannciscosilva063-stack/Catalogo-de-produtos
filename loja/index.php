@@ -986,58 +986,91 @@
           
           <?php
           try {
+            // CATEGORIAS COM IMAGENS WEB
+            $categorias = array(
+              // Eletrônicos
+              array('nome' => 'Eletrônicos', 'imagem' => 'https://img.freepik.com/fotos-gratis/arranjo-de-colecao-estacionario-moderno_23-2149309638.jpg'),
+              
+              // Bebidas
+              array('nome' => 'Bebidas', 'imagem' => 'https://img.freepik.com/fotos-gratis/bar-concurso-adiciona-gelo-com-clipe-de-aco-em-copo-de-cocktail_141793-1998.jpg'),
+              
+              // Roupas
+              array('nome' => 'Roupas', 'imagem' => 'https://img.freepik.com/fotos-gratis/conceito-de-maquete-de-camisa-com-roupas-simples_23-2149448749.jpg'),
+              
+              // Calçados
+              array('nome' => 'Calçados', 'imagem' => 'https://img.freepik.com/fotos-gratis/vista-de-um-rack-de-sapatos-para-empilhar-um-par-de-calcados_23-2150991549.jpg'),
+              
+              // Bolsas
+              array('nome' => 'Bolsas', 'imagem' => 'https://img.freepik.com/fotos-gratis/saco-pendurado-em-um-item-de-mobiliario-dentro-de-casa_23-2151073514.jpg'),
+              
+              // Relógios
+              array('nome' => 'Relógios', 'imagem' => 'https://img.freepik.com/fotos-gratis/vista-frontal-do-relogio-de-mao_23-2148385833.jpg'),
+              
+              // Perfumes
+              array('nome' => 'Perfumes', 'imagem' => 'https://img.freepik.com/fotos-gratis/mulher-caucasiano-perfume-aplicando-para-dela-pescoco_53876-14.jpg'),
+              
+              // Maquiagem
+              array('nome' => 'Maquiagem', 'imagem' => 'https://img.freepik.com/fotos-gratis/arranjo-de-pinceis-de-maquiagem-de-alto-angulo_23-2149860768.jpg'),
+              
+              // Eletrodomésticos
+              array('nome' => 'Eletrodomésticos', 'imagem' => 'https://img.freepik.com/vetores-gratis/utensilios-de-cozinha-inteligentes-para-geladeira-forno-a-gas-e-exaustor_107791-2971.jpg'),
+              
+              // Móveis
+              array('nome' => 'Móveis', 'imagem' => 'https://img.freepik.com/fotos-gratis/planta-de-borracha-em-uma-mesa-de-madeira_53876-146856.jpg'),
+              
+              // Decoração
+              array('nome' => 'Decoração', 'imagem' => 'https://img.freepik.com/fotos-gratis/pompons-decorativos-usados-para-vaso-decorativo_23-2149449983.jpg'),
+              
+              // Esportes
+              array('nome' => 'Esportes', 'imagem' => 'https://img.freepik.com/fotos-gratis/ferramentas-desportivas_53876-138077.jpg'),
+              
+              // Suplementos
+              array('nome' => 'Suplementos', 'imagem' => 'https://img.freepik.com/fotos-gratis/arranjo-com-comprimidos-no-recipiente_23-2149080623.jpg'),
+              
+              // Livros
+              array('nome' => 'Livros', 'imagem' => 'https://img.freepik.com/fotos-gratis/de-cima-livros-abertos_23-2147779265.jpg'),
+              
+              // Papelaria
+              array('nome' => 'Papelaria', 'imagem' => 'https://img.freepik.com/fotos-gratis/sketchbook-em-material-de-escritorio_23-2147689744.jpg'),
+              
+              // Brinquedos
+              array('nome' => 'Brinquedos', 'imagem' => 'https://img.freepik.com/fotos-gratis/garoto-de-vista-frontal-brincando-com-brinquedos-de-madeira_23-2149357210.jpg'),
+              
+              // Pet Shop
+              array('nome' => 'Pet Shop', 'imagem' => 'https://img.freepik.com/fotos-gratis/adoravel-cachorro-com-dona-na-loja-de-animais_23-2148872557.jpg'),
+              
+              // Ferramentas
+              array('nome' => 'Ferramentas', 'imagem' => 'https://img.freepik.com/fotos-gratis/vista-superior-de-um-martelo-de-aco-com-outros-elementos-de-construcao-e-ferramentas_23-2150576396.jpg'),
+              
+              // Jardim
+              array('nome' => 'Jardim', 'imagem' => 'https://img.freepik.com/fotos-gratis/trilha-sob-um-belo-arco-de-flores-e-plantas_181624-16890.jpg'),
+              
+              // Automotivo
+              array('nome' => 'Automotivo', 'imagem' => 'https://img.freepik.com/fotos-gratis/um-carro-esporte-de-cor-metalica-tira-com-alta-velocidade-na-estrada_114579-4029.jpg'),
+              
+              // Alimentos
+              array('nome' => 'Alimentos', 'imagem' => 'https://img.freepik.com/fotos-gratis/visao-superior-da-variedade-de-piramide-alimentar-real_23-2150238927.jpg')
+            );
+
+            // Buscar categorias do banco de dados
             $cats = $conect->query("SELECT * FROM tb_categorias ORDER BY nome_categoria");
             
+            // Mapear categorias do banco com as imagens pré-definidas
             while($c = $cats->fetch(PDO::FETCH_OBJ)){
               $ativo = (isset($_GET['cat']) && $_GET['cat'] == $c->id_categoria) ? 'active' : '';
-              $nome_categoria = strtolower($c->nome_categoria);
+              $nome_categoria = $c->nome_categoria;
               $imagem_categoria = '';
               
-              // Definir imagem baseada no nome da categoria
-              if (strpos($nome_categoria, 'fruta') !== false || strpos($nome_categoria, 'verdura') !== false) {
-                $imagem_categoria = 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80';
-              } elseif (strpos($nome_categoria, 'bebida') !== false) {
-                $imagem_categoria = 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80';
-              } elseif (strpos($nome_categoria, 'padaria') !== false || strpos($nome_categoria, 'pão') !== false) {
-                $imagem_categoria = 'https://images.unsplash.com/photo-1509440159596-0249088772ff?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80';
-              } elseif (strpos($nome_categoria, 'laticínio') !== false || strpos($nome_categoria, 'leite') !== false || strpos($nome_categoria, 'queijo') !== false) {
-                $imagem_categoria = 'https://images.unsplash.com/photo-1488462237308-ecaa28b729d7?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80';
-              } elseif (strpos($nome_categoria, 'carne') !== false || strpos($nome_categoria, 'frango') !== false || strpos($nome_categoria, 'bovino') !== false) {
-                $imagem_categoria = 'https://images.unsplash.com/photo-1602476526386-6bbf6a3e3c7e?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80';
-              } elseif (strpos($nome_categoria, 'limpeza') !== false) {
-                $imagem_categoria = 'https://images.unsplash.com/photo-1583947581924-860bda6a26df?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80';
-              } elseif (strpos($nome_categoria, 'pet') !== false) {
-                $imagem_categoria = 'https://images.unsplash.com/photo-1518717758536-85ae29035b6d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80';
-              } elseif (strpos($nome_categoria, 'hortifruti') !== false) {
-                $imagem_categoria = 'https://images.unsplash.com/photo-1540420773420-3366772f4999?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80';
-              } elseif (strpos($nome_categoria, 'eletrodoméstico') !== false || strpos($nome_categoria, 'eletro') !== false) {
-                $imagem_categoria = 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80';
-              } elseif (strpos($nome_categoria, 'higiene') !== false || strpos($nome_categoria, 'beleza') !== false) {
-                $imagem_categoria = 'https://images.unsplash.com/photo-1522338242990-e8c0f8f9d43a?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80';
-              } elseif (strpos($nome_categoria, 'congelado') !== false || strpos($nome_categoria, 'frio') !== false) {
-                $imagem_categoria = 'https://images.unsplash.com/photo-1571175443880-49e1d1b7b3c3?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80';
-              } elseif (strpos($nome_categoria, 'enlatado') !== false || strpos($nome_categoria, 'conserva') !== false) {
-                $imagem_categoria = 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80';
-              } elseif (strpos($nome_categoria, 'grão') !== false || strpos($nome_categoria, 'cereal') !== false) {
-                $imagem_categoria = 'https://images.unsplash.com/photo-1592921870789-04563d55041c?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80';
-              } elseif (strpos($nome_categoria, 'biscoito') !== false || strpos($nome_categoria, 'snack') !== false) {
-                $imagem_categoria = 'https://images.unsplash.com/photo-1598983871855-7d6c17c24d0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80';
-              } elseif (strpos($nome_categoria, 'roupa') !== false || strpos($nome_categoria, 'vestuário') !== false) {
-                $imagem_categoria = 'https://images.unsplash.com/photo-1445205170230-053b83016050?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80';
-              } elseif (strpos($nome_categoria, 'material') !== false || strpos($nome_categoria, 'escritório') !== false) {
-                $imagem_categoria = 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80';
-              } elseif (strpos($nome_categoria, 'brinquedo') !== false) {
-                $imagem_categoria = 'https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80';
-              } elseif (strpos($nome_categoria, 'automotivo') !== false) {
-                $imagem_categoria = 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80';
-              } elseif (strpos($nome_categoria, 'construção') !== false) {
-                $imagem_categoria = 'https://images.unsplash.com/photo-1503387769-00a112127ca0?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80';
-              } elseif (strpos($nome_categoria, 'farmácia') !== false || strpos($nome_categoria, 'medicamento') !== false) {
-                $imagem_categoria = 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80';
-              } elseif (strpos($nome_categoria, 'pescado') !== false || strpos($nome_categoria, 'peixe') !== false) {
-                $imagem_categoria = 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80';
-              } else {
-                // Imagem padrão para categorias não mapeadas - usando a parede de cimento
+              // Encontrar a imagem correspondente na matriz
+              foreach($categorias as $categoria_predefinida){
+                if(strcasecmp($categoria_predefinida['nome'], $nome_categoria) === 0){
+                  $imagem_categoria = $categoria_predefinida['imagem'];
+                  break;
+                }
+              }
+              
+              // Se não encontrar imagem específica, usar imagem padrão
+              if(empty($imagem_categoria)){
                 $imagem_categoria = 'https://img.freepik.com/fotos-gratis/parede-de-cimento-branco_53876-88673.jpg?w=900&t=st=1708012345~exp=1708012945~hmac=9a3b6493e697444ea044b4f66654c0d7a2b5d5c5c8e8c8c8c8c8c8c8c8c8c8c8';
               }
               
