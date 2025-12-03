@@ -16,6 +16,57 @@ $nome_user = isset($_SESSION['nome_user']) ? $_SESSION['nome_user'] : 'Usuário'
 
 // Incluir conexão
 require_once('../config/conexao.php');
+
+// === INÍCIO: Handler de exclusão de produto (antes de qualquer saída) ===
+if (isset($_GET['acao']) && $_GET['acao'] === 'excluir_produto' && isset($_GET['id'])) {
+    $id_produto_excluir = (int)$_GET['id'];
+
+    try {
+        // busca produto para validar propriedade e obter nome do arquivo
+        $stmtP = $conect->prepare("SELECT id_produto, foto_produto, id_user FROM tb_produtos WHERE id_produto = ?");
+        $stmtP->execute([$id_produto_excluir]);
+
+        if ($stmtP->rowCount() === 0) {
+            // produto não encontrado
+            $_SESSION['flash_error'] = 'Produto não encontrado.';
+        } else {
+            $prod = $stmtP->fetch(PDO::FETCH_OBJ);
+            // valida proprietário
+            if ((int)$prod->id_user !== (int)$id_user) {
+                $_SESSION['flash_error'] = 'Você não tem permissão para excluir este produto.';
+            } else {
+                // transação: remove movimentos de estoque e produto
+                $conect->beginTransaction();
+                $delEst = $conect->prepare("DELETE FROM tb_estoque WHERE id_produto = ?");
+                $delEst->execute([$id_produto_excluir]);
+
+                $delProd = $conect->prepare("DELETE FROM tb_produtos WHERE id_produto = ?");
+                $delProd->execute([$id_produto_excluir]);
+
+                $conect->commit();
+
+                // remove arquivo de imagem se existir e não for imagem padrão
+                if (!empty($prod->foto_produto) && $prod->foto_produto !== 'produto-sem-foto.jpg') {
+                    $file = __DIR__ . '/../../img/produtos/' . $prod->foto_produto;
+                    if (file_exists($file)) {
+                        @unlink($file);
+                    }
+                }
+
+                $_SESSION['flash_success'] = 'Produto excluído com sucesso.';
+            }
+        }
+    } catch (Exception $e) {
+        if ($conect->inTransaction()) { $conect->rollBack(); }
+        $_SESSION['flash_error'] = 'Erro ao excluir produto: ' . $e->getMessage();
+    }
+
+    // redireciona para evitar reenvio e limpar query string
+    header('Location: ' . $_SERVER['SCRIPT_NAME'] . '?acao=bemvindo');
+    exit;
+}
+// === FIM: Handler de exclusão ===
+
 // ============================================
 // FIM DA VERIFICAÇÃO
 // ============================================
@@ -288,8 +339,8 @@ require_once('../config/conexao.php');
                                 <table class="table table-striped">
                                     <thead>
                                         <tr>
-                                            <th>#</th>
-                                            <th>Foto</th>
+                                             <th>#</th>
+                                           <th>Foto</th>
                                             <th>Produto</th>
                                             <th>Categoria</th>
                                             <th>Preço Venda</th>
@@ -345,25 +396,18 @@ require_once('../config/conexao.php');
                                                         </span>
                                                     </td>
                                                     <td>
-                                                        <a href="?acao=editar_produto&id=<?= $p->id_produto ?>" class="btn btn-sm btn-warning" title="Editar">
+                                                        <a href="?acao=editar_produto&id=<?= (int)$p->id_produto ?>" class="btn btn-sm btn-warning" title="Editar">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
-                                                        <?php if (isset($_GET['acao']) && $_GET['acao'] === 'excluir_produto' && isset($_GET['id'])) {
-                                                            $id_produto_excluir = (int)$_GET['id'];
-                                                            try {
-                                                                $sql_excluir = "DELETE FROM tb_produtos WHERE id_produto = ?";
-                                                                $stmt_excluir = $conect->prepare($sql_excluir);
-                                                                $stmt_excluir->execute([$id_produto_excluir]);
-                                                               
-                                                            } catch (Exception $e) {
-                                                                echo '<div class="alert alert-danger">Erro ao excluir produto: ' . htmlspecialchars($e->getMessage()) . '</div>';
-                                                            }
-                                                        } ?>
-                                                        <a href="?acao=excluir_produto&id=<?= $p->id_produto ?>" 
-                                                           onclick="return confirm('Tem certeza que deseja excluir este produto permanentemente?')" 
-                                                           class="btn btn-sm btn-danger" title="Excluir">
-                                                           <i class="fas fa-trash"></i>
-                                                        </a>
+
+                                                        <!-- Usar formulário POST (query string mantém 'acao' para o handler existente) -->
+                                                        <form method="post" action="<?= htmlspecialchars($_SERVER['SCRIPT_NAME']) . '?acao=excluir_produto&id=' . (int)$p->id_produto ?>" 
+                                                              onsubmit="return confirm('Tem certeza que deseja excluir este produto permanentemente?');" 
+                                                              style="display:inline">
+                                                            <button type="submit" class="btn btn-sm btn-danger" title="Excluir">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        </form>
                                                     </td>
                                                 </tr>
                                     <?php 

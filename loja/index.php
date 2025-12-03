@@ -7,6 +7,7 @@
   <title>Mercado Express | Catálogo de Produtos</title>
   <link rel="stylesheet" href="plugins/fontawesome-free/css/all.min.css">
   <link rel="stylesheet" href="dist/css/adminlte.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 
 <style>
   :root {
@@ -17,6 +18,11 @@
     --text-dark: #2D3047;
     --text-light: #6C757D;
     --success-color: #06D6A0;
+    --success-dark: #059973;
+    --success-light: #0AFFC2;
+    --warning-color: #FFD166;
+    --warning-dark: #E6B950;
+    --low-stock-color: #4A90E2;
     --white: #ffffff;
     --gray-light: #F8F9FA;
   }
@@ -512,45 +518,80 @@
     width: 100%;
     position: relative;
     overflow: hidden;
-  }
-
-  /* Estilo para imagem padrão - PAREDE DE CIMENTO BRANCO */
-  .default-image-container {
-    width: 100%;
-    height: 100%;
-    background-image: url('https://img.freepik.com/fotos-gratis/parede-de-cimento-branco_53876-88673.jpg?w=900&t=st=1708012345~exp=1708012945~hmac=9a3b6493e697444ea044b4f66654c0d7a2b5d5c5c8e8c8c8c8c8c8c8c8c8c8c8');
-    background-size: cover;
-    background-position: center;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
-  .default-image-overlay {
+  /* Estilo para imagem padrão - LOGO PROFISSIONAL MERCADO EXPRESS */
+  .default-image-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Logo SVG animada */
+  .mercado-express-logo {
+    width: 90%;
+    height: 90%;
+    max-width: 250px;
+    max-height: 200px;
+    filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.15));
+    animation: logoFloat 3s ease-in-out infinite;
+  }
+
+  @keyframes logoFloat {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+
+  .product-card:hover .mercado-express-logo {
+    animation: logoFloat 2s ease-in-out infinite;
+  }
+
+  .logo-placeholder {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 20px;
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 10px;
-    margin: 20px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    height: 100%;
   }
 
-  .default-image-overlay i {
-    font-size: 3rem;
-    color: var(--primary-color);
-    margin-bottom: 15px;
+  .logo-icon {
+    font-size: 4rem;
+    color: var(--white);
+    margin-bottom: 10px;
+    text-shadow: 0 4px 15px rgba(0,0,0,0.3);
   }
 
-  .default-image-text {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--text-dark);
-    line-height: 1.4;
-    max-width: 200px;
+  .logo-text {
+    font-family: 'Arial Black', 'Segoe UI', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--white);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  }
+
+  .logo-subtext {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.9);
+    margin-top: 5px;
+    font-weight: 500;
   }
 
   .product-image {
@@ -571,12 +612,16 @@
     flex-grow: 1;
   }
 
+  /* Estilo do nome do produto modificado */
   .product-name {
     font-weight: 700;
-    font-size: 1.2rem;
-    margin-bottom: 10px;
+    font-size: 1.4rem;
+    margin-bottom: 12px;
     color: var(--text-dark);
-    line-height: 1.4;
+    line-height: 1.3;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    letter-spacing: -0.2px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
   }
 
   .product-description {
@@ -587,12 +632,38 @@
     line-height: 1.6;
   }
 
+  /* Estilo do preço com cores baseadas no estoque */
   .product-price {
-    font-weight: 800;
-    font-size: 1.5rem;
-    color: var(--primary-color);
+    font-weight: 900;
+    font-size: 1.8rem;
     margin-bottom: 15px;
     text-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    letter-spacing: -0.5px;
+  }
+
+  .price-high-stock {
+    color: var(--success-dark); /* Verde escuro para alto estoque */
+    background: linear-gradient(45deg, var(--success-dark), var(--success-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .price-low-stock {
+    color: var(--low-stock-color); /* Azul para estoque baixo */
+    background: linear-gradient(45deg, var(--low-stock-color), #2C5AA0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .price-no-stock {
+    color: #dc3545; /* Vermelho para sem estoque */
+    background: linear-gradient(45deg, #dc3545, #ff6b6b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
   .product-footer {
@@ -600,6 +671,77 @@
     justify-content: space-between;
     align-items: center;
     margin-top: auto;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  /* Estilos para descrição da imagem */
+  .image-description {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, rgba(44, 90, 160, 0.05), rgba(78, 205, 196, 0.05));
+    border-left: 4px solid var(--primary-color);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: var(--text-dark);
+    font-weight: 500;
+    margin-bottom: 15px;
+    line-height: 1.5;
+    max-height: 60px;
+    overflow-y: auto;
+  }
+
+  .image-description i {
+    color: var(--primary-color);
+    margin-right: 8px;
+  }
+
+  /* Estilos para código de barras */
+  .barcode-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px;
+    background: rgba(248, 249, 250, 0.9);
+    border-radius: 10px;
+    border: 2px dashed rgba(44, 90, 160, 0.2);
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+  }
+
+  .barcode-container:hover {
+    border-color: var(--primary-color);
+    background: rgba(248, 249, 250, 1);
+    box-shadow: 0 4px 12px rgba(44, 90, 160, 0.1);
+  }
+
+  .barcode-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 8px;
+  }
+
+  .barcode-wrapper svg {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .barcode-label {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+  }
+
+  .barcode-number {
+    font-size: 0.8rem;
+    color: var(--text-dark);
+    font-family: 'Courier New', monospace;
+    font-weight: 700;
+    letter-spacing: 2px;
   }
 
   .stock-badge {
@@ -618,9 +760,9 @@
   }
 
   .stock-low {
-    background: rgba(255, 209, 102, 0.15);
-    color: var(--accent-color);
-    border: 2px solid var(--accent-color);
+    background: rgba(74, 144, 226, 0.15);
+    color: var(--low-stock-color);
+    border: 2px solid var(--low-stock-color);
   }
 
   .stock-out {
@@ -863,18 +1005,12 @@
       padding: 20px;
     }
     
-    .default-image-overlay {
-      padding: 15px;
-      margin: 15px;
+    .logo-icon {
+      font-size: 3rem;
     }
     
-    .default-image-overlay i {
-      font-size: 2.5rem;
-      margin-bottom: 10px;
-    }
-    
-    .default-image-text {
-      font-size: 0.9rem;
+    .logo-text {
+      font-size: 1.2rem;
     }
   }
 
@@ -904,17 +1040,12 @@
       height: 100px;
     }
     
-    .default-image-overlay {
-      padding: 10px;
-      margin: 10px;
+    .logo-icon {
+      font-size: 2.5rem;
     }
     
-    .default-image-overlay i {
-      font-size: 2rem;
-    }
-    
-    .default-image-text {
-      font-size: 0.85rem;
+    .logo-text {
+      font-size: 1rem;
     }
   }
 
@@ -1052,7 +1183,7 @@
               array('nome' => 'Alimentos', 'imagem' => 'https://img.freepik.com/fotos-gratis/visao-superior-da-variedade-de-piramide-alimentar-real_23-2150238927.jpg')
             );
 
-            // Buscar categorias do banco de dados
+            // Buscar todas as categorias do banco de dados
             $cats = $conect->query("SELECT * FROM tb_categorias ORDER BY nome_categoria");
             
             // Mapear categorias do banco com as imagens pré-definidas
@@ -1071,7 +1202,7 @@
               
               // Se não encontrar imagem específica, usar imagem padrão
               if(empty($imagem_categoria)){
-                $imagem_categoria = 'https://img.freepik.com/fotos-gratis/parede-de-cimento-branco_53876-88673.jpg?w=900&t=st=1708012345~exp=1708012945~hmac=9a3b6493e697444ea044b4f66654c0d7a2b5d5c5c8e8c8c8c8c8c8c8c8c8c8c8';
+                $imagem_categoria = 'https://cdn.pixabay.com/photo/2022/08/28/03/42/sea-7415664_960_720.png 1x, https://cdn.pixabay.com/photo/2022/08/28/03/42/sea-7415664_1280.png 2x';
               }
               
               echo "<div class='category-card $ativo' data-category='{$c->id_categoria}'>
@@ -1199,25 +1330,43 @@
           $produtos = $conect->query($sql);
           
           if($produtos->rowCount() == 0){
-            echo '<div class="empty-state">
-                    <i class="fas fa-shopping-basket"></i>
-                    <h3>Nenhum produto encontrado</h3>
-                    <p>Tente alterar os filtros ou buscar por outro termo.</p>
-                    <a href="index.php" class="btn-success">Ver Todos os Produtos</a>
-                  </div>';
+            // Se filtrou por categoria, mostre mensagem de categoria vazia
+            if(isset($_GET['cat'])) {
+              $cat_id = (int)$_GET['cat'];
+              $cat_nome = $conect->prepare("SELECT nome_categoria FROM tb_categorias WHERE id_categoria = ?");
+              $cat_nome->execute([$cat_id]);
+              $nome_cat = $cat_nome->fetchColumn();
+              
+              echo '<div class="empty-state">
+                      <i class="fas fa-box-open"></i>
+                      <h3>Sem Produtos em ' . htmlspecialchars($nome_cat) . '</h3>
+                      <p>Esta categoria ainda não possui produtos cadastrados.</p>
+                      <a href="index.php" class="btn-success">Ver Todos os Produtos</a>
+                    </div>';
+            } else {
+              echo '<div class="empty-state">
+                      <i class="fas fa-shopping-basket"></i>
+                      <h3>Nenhum produto encontrado</h3>
+                      <p>Tente alterar os filtros ou buscar por outro termo.</p>
+                      <a href="index.php" class="btn-success">Ver Todos os Produtos</a>
+                    </div>';
+            }
           }
           
           while($p = $produtos->fetch(PDO::FETCH_OBJ)){
-            // Definir cor do badge de estoque
+            // Definir cor do badge de estoque e classe de preço
             $estoque_class = 'stock-in';
             $estoque_text = 'Em Estoque';
+            $preco_class = 'price-high-stock';
             
             if($p->estoque == 0) {
               $estoque_class = 'stock-out';
               $estoque_text = 'Sem Estoque';
+              $preco_class = 'price-no-stock';
             } else if($p->estoque < 10) {
               $estoque_class = 'stock-low';
               $estoque_text = 'Estoque Baixo';
+              $preco_class = 'price-low-stock';
             }
             
             // Verificar se a imagem existe
@@ -1230,25 +1379,92 @@
             if($tem_imagem) {
               echo "<img src='$imagem_path' alt='{$p->nome_produto}' class='product-image'>";
             } else {
-              // IMAGEM PADRÃO - PAREDE DE CIMENTO BRANCO
+              // LOGO SVG PROFISSIONAL DO MERCADO EXPRESS
               echo "<div class='default-image-container'>
-                      <div class='default-image-overlay'>
-                        <i class='fas fa-cube'></i>
-                        <div class='default-image-text'>
-                          Imagem não disponível<br>
-                          <small>Produto: {$p->nome_produto}</small>
-                        </div>
-                      </div>
+                      <svg viewBox='0 0 400 300' xmlns='http://www.w3.org/2000/svg' class='mercado-express-logo'>
+                        <!-- Fundo gradiente -->
+                        <defs>
+                          <linearGradient id='bgGradient' x1='0%' y1='0%' x2='100%' y2='100%'>
+                            <stop offset='0%' style='stop-color:#2C5AA0;stop-opacity:1' />
+                            <stop offset='100%' style='stop-color:#1E3F73;stop-opacity:1' />
+                          </linearGradient>
+                          <linearGradient id='basketGradient' x1='0%' y1='0%' x2='100%' y2='100%'>
+                            <stop offset='0%' style='stop-color:#FFD166;stop-opacity:1' />
+                            <stop offset='100%' style='stop-color:#FFC43D;stop-opacity:1' />
+                          </linearGradient>
+                          <filter id='shadow' x='-50%' y='-50%' width='200%' height='200%'>
+                            <feDropShadow dx='2' dy='4' stdDeviation='3' flood-opacity='0.3'/>
+                          </filter>
+                        </defs>
+                        
+                        <!-- Fundo -->
+                        <rect width='400' height='300' fill='url(#bgGradient)'/>
+                        
+                        <!-- Círculo decorativo fundo -->
+                        <circle cx='200' cy='150' r='95' fill='rgba(255,255,255,0.1)'/>
+                        
+                        <!-- Cesto de compras estilizado -->
+                        <g filter='url(#shadow)'>
+                          <!-- Alça do cesto -->
+                          <path d='M 140 110 Q 140 70 200 70 Q 260 70 260 110' stroke='url(#basketGradient)' stroke-width='8' fill='none' stroke-linecap='round'/>
+                          
+                          <!-- Corpo do cesto -->
+                          <path d='M 130 115 L 145 200 Q 145 220 165 220 L 235 220 Q 255 220 255 200 L 270 115 Z' fill='url(#basketGradient)' stroke='#FFC43D' stroke-width='2'/>
+                          
+                          <!-- Detalhes do cesto - linhas -->
+                          <line x1='160' y1='130' x2='150' y2='200' stroke='rgba(255,255,255,0.3)' stroke-width='1.5'/>
+                          <line x1='200' y1='125' x2='200' y2='220' stroke='rgba(255,255,255,0.3)' stroke-width='1.5'/>
+                          <line x1='240' y1='130' x2='250' y2='200' stroke='rgba(255,255,255,0.3)' stroke-width='1.5'/>
+                        </g>
+                        
+                        <!-- Texto: MERCADO EXPRESS -->
+                        <text x='200' y='265' font-family='Arial, sans-serif' font-size='28' font-weight='bold' text-anchor='middle' fill='white' letter-spacing='1'>
+                          MERCADO EXPRESS
+                        </text>
+                        
+                        <!-- Tagline -->
+                        <text x='200' y='285' font-family='Arial, sans-serif' font-size='11' text-anchor='middle' fill='#FFD166' letter-spacing='0.5' font-weight='500'>
+                          QUALIDADE EM CADA COMPRA
+                        </text>
+                      </svg>
                     </div>";
             }
             
             echo "</div>
                     <div class='product-info'>
-                      <h3 class='product-name'>{$p->nome_produto}</h3>
-                      <p class='product-description'>{$p->descricao_produto}</p>
-                      <div class='product-price'>R$ " . number_format($p->preco_venda, 2, ',', '.') . "</div>
+                      <h3 class='product-name'>{$p->nome_produto}</h3>";
+            
+            // Exibir descrição da imagem se existir
+            if(!empty($p->descricao_produto)) {
+              echo "<div class='image-description'>
+                      <i class='fas fa-image'></i>
+                      " . htmlspecialchars(substr($p->descricao_produto, 0, 80)) . (strlen($p->descricao_produto) > 80 ? '...' : '') . "
+                    </div>";
+            }
+            
+            // Exibir código de barras se existir
+            if(!empty($p->codigo_barra)) {
+              echo "<div class='barcode-container'>
+                      <div class='barcode-label'>Código de Barras</div>
+                      <div class='barcode-wrapper'>
+                        <svg id='barcode-{$p->id_produto}'></svg>
+                      </div>
+                      <div class='barcode-number'>{$p->codigo_barra}</div>
+                    </div>
+                    <script>
+                      JsBarcode('#barcode-{$p->id_produto}', '{$p->codigo_barra}', {
+                        format: 'CODE128',
+                        width: 2,
+                        height: 50,
+                        displayValue: false,
+                        margin: 5
+                      });
+                    </script>";
+            }
+            
+            echo "<div class='product-price {$preco_class}'>R$ " . number_format($p->preco_venda, 2, ',', '.') . "</div>
                       <div class='product-footer'>
-                        <span class='stock-badge $estoque_class'>$estoque_text</span>
+                        <span class='stock-badge {$estoque_class}'>{$estoque_text}</span>
                       </div>
                     </div>
                   </div>";
