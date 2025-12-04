@@ -7,17 +7,17 @@ if (!ob_get_level()) {
 // Garantir que exista a conexão PDO quando o script for chamado diretamente (ex.: export via home.php?export=...)
 if (!isset($conect) || !($conect instanceof PDO)) {
     $possible = [
-        __DIR__ . '/../../config/conexao.php',   // quando incluído por home.php localizado em paginas/
-        __DIR__ . '/../config/conexao.php',      // fallback relativo
-        __DIR__ . '/config/conexao.php'          // outro fallback
+        __DIR__ . '/../../config/conexao.php', // normalmente: /Catalogo-de-produtos/config/conexao.php
+        __DIR__ . '/../config/conexao.php',
+        __DIR__ . '/config/conexao.php'
     ];
     foreach ($possible as $p) {
-        if (file_exists($p)) {
-            require_once $p;
-            break;
-        }
+        if (file_exists($p)) { require_once $p; break; }
     }
 }
+
+// Inicia sessão para mensagens
+
 
 // -------------------------------------------------
 // Carregamento de produtos
@@ -29,7 +29,7 @@ try {
     }
     // Prepara e executa a query de produtos (filtrando por id_user se houver)
     if (!empty($id_user)) {
-        $sql = "SELECT p.id_produto, p.nome_produto, p.preco_venda, p.foto_produto, c.nome_categoria
+        $sql = "SELECT p.id_produto, p.nome_produto, p.preco_venda, p.foto_produto, p.descricao_produto, p.id_categoria, c.nome_categoria
                 FROM tb_produtos p
                 LEFT JOIN tb_categorias c ON p.id_categoria = c.id_categoria
                 WHERE p.id_user = ? AND p.status = 'ativo'
@@ -37,7 +37,7 @@ try {
         $stmt = $conect->prepare($sql);
         $stmt->execute([$id_user]);
     } else {
-        $sql = "SELECT p.id_produto, p.nome_produto, p.preco_venda, p.foto_produto, c.nome_categoria
+        $sql = "SELECT p.id_produto, p.nome_produto, p.preco_venda, p.foto_produto, p.descricao_produto, p.id_categoria, c.nome_categoria
                 FROM tb_produtos p
                 LEFT JOIN tb_categorias c ON p.id_categoria = c.id_categoria
                 WHERE p.status = 'ativo'
@@ -49,6 +49,12 @@ try {
     echo '<div class="alert alert-danger m-3">Erro ao carregar produtos: '.htmlspecialchars($e->getMessage()).'</div>';
     $produtos = [];
 }
+
+// --- NOVO: calcular base pública para imagens (ex.: /Catalogo-de-produtos/img/produtos/)
+$scriptRoot = @dirname($_SERVER['SCRIPT_NAME'], 2); // geralmente "/Catalogo-de-produtos"
+if ($scriptRoot === '/' || $scriptRoot === '\\' || $scriptRoot === '.') { $scriptRoot = ''; }
+$imgUrlBase = rtrim($scriptRoot, '/\\') . '/img/produtos/';
+$avatarFallback = rtrim($scriptRoot, '/\\') . '/img/img_padrao/img.jpeg';
 
 // -------------------------------------------------
 // Export handlers: csv, xls (CSV com extensão .xls), json, print, pdf (redireciona)
@@ -175,7 +181,14 @@ if (isset($_GET['export'])) {
               <?php foreach ($rows as $r): ?>
                 <tr>
                   <td><?php echo $r['id']; ?></td>
-                  <td><?php if($r['foto']): ?><img src="<?php echo '../img/prod/'.htmlspecialchars($r['foto']); ?>" alt="foto"><?php endif; ?></td>
+                  <td>
+                    <?php
+                      $fotoFile = $r['foto'] ?: 'produto-sem-foto.jpg';
+                      $fotoUrl = htmlspecialchars($imgUrlBase . rawurlencode($fotoFile));
+                      $avatar = htmlspecialchars($avatarFallback);
+                    ?>
+                    <img src="<?php echo $fotoUrl; ?>" alt="foto" onerror="this.onerror=null;this.src='<?php echo $avatar; ?>'">
+                  </td>
                   <td><?php echo htmlspecialchars($r['nome']); ?></td>
                   <td><?php echo htmlspecialchars($r['categoria']); ?></td>
                   <td><?php echo htmlspecialchars(mb_strimwidth($r['descricao'], 0, 200, '...')); ?></td>
@@ -204,7 +217,7 @@ if (isset($_GET['export'])) {
         foreach ($rows as $r) {
             $html .= '<tr>';
             $html .= '<td>'.htmlspecialchars($r['id']).'</td>';
-            $html .= '<td>'.($r['foto']?'<img src="'.htmlspecialchars('../img/prod/'.$r['foto']).'" alt="foto">':'').'</td>';
+            $html .= '<td>'.($r['foto']?'<img src="'.htmlspecialchars('../img/produtos/'.$r['foto']).'" alt="foto">':'').'</td>';
             $html .= '<td>'.htmlspecialchars($r['nome']).'</td>';
             $html .= '<td>'.htmlspecialchars($r['categoria']).'</td>';
             $html .= '<td>'.htmlspecialchars(mb_strimwidth($r['descricao'],0,300,'...')).'</td>';
@@ -241,10 +254,33 @@ if (isset($_GET['export'])) {
         }
     }
 }
+
+// ----
 // -------------------------------------------------
 ?>
 <!-- Content Wrapper. Contains page content -->
-  <div class="content-wrapper">
+<div class="content-wrapper">
+    <!-- Exibir mensagens de sucesso/erro -->
+    <?php if (isset($_SESSION['msg_sucesso'])): ?>
+        <div class="alert alert-success alert-dismissible fade show m-3" role="alert">
+            <?php echo htmlspecialchars($_SESSION['msg_sucesso']); ?>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <?php unset($_SESSION['msg_sucesso']); ?>
+    <?php endif; ?>
+    
+    <?php if (isset($_SESSION['msg_erro'])): ?>
+        <div class="alert alert-danger alert-dismissible fade show m-3" role="alert">
+            <?php echo htmlspecialchars($_SESSION['msg_erro']); ?>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <?php unset($_SESSION['msg_erro']); ?>
+    <?php endif; ?>
+
     <!-- ...existing markup... -->
                 </table>
 
@@ -284,10 +320,11 @@ if (isset($_GET['export'])) {
                       <?php foreach ($produtos as $p): ?>
                         <?php
                           $fotoName = !empty($p->foto_produto) ? $p->foto_produto : 'produto-sem-foto.jpg';
-                          $foto = '../img/prod/' . htmlspecialchars($fotoName);
+                          $foto = htmlspecialchars($imgUrlBase . rawurlencode($fotoName));
                           $nome = htmlspecialchars($p->nome_produto ?? '—');
                           $cat  = htmlspecialchars($p->nome_categoria ?? '—');
                           $preco = number_format((float)($p->preco_venda ?? 0), 2, ',', '.');
+                          $idProduto = (int)($p->id_produto ?? 0);
                           // atributos para filtragem (em lowercase para facilitar)
                           $dataName = strtolower($p->nome_produto ?? '');
                           $dataCat  = strtolower($p->nome_categoria ?? '');
@@ -295,14 +332,182 @@ if (isset($_GET['export'])) {
                         <div class="col-sm-6 col-md-4 col-lg-3 mb-3 product-card" 
                              data-name="<?php echo htmlspecialchars($dataName); ?>" 
                              data-category="<?php echo htmlspecialchars($dataCat); ?>">
-                          <div class="card h-100">
-                            <img src="<?php echo $foto; ?>" class="card-img-top" alt="<?php echo $nome; ?>" style="height:220px;object-fit:cover;">
+                          <div class="card h-100 position-relative">
+                            <!-- Menu de ações (ícone três pontos) -->
+                            <div class="position-absolute" style="top:10px; right:10px; z-index:10;">
+                              <div class="dropdown">
+                                <button class="btn btn-sm btn-light rounded-circle shadow-sm" type="button" 
+                                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                        style="width:32px; height:32px; padding:0; display:flex; align-items:center; justify-content:center;">
+                                  <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right">
+                                 <a href="?acao=editar_produto&id=<?= (int)$p->id_produto ?>" class="btn btn-sm btn-warning" title="Editar">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                  <form method="post" action="<?= htmlspecialchars($_SERVER['SCRIPT_NAME']) . '?acao=excluir_produto&id=' . (int)$p->id_produto ?>" 
+                                                              onsubmit="return confirm('Tem certeza que deseja excluir este produto permanentemente?');" 
+                                                              style="display:inline">
+                                                            <button type="submit" class="btn btn-sm btn-danger" title="Excluir">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <img src="<?php echo $foto; ?>" class="card-img-top" alt="<?php echo $nome; ?>" 
+                                 style="height:220px;object-fit:cover;" 
+                                 onerror="this.onerror=null;this.src='<?php echo htmlspecialchars($avatarFallback); ?>'">
+                            
                             <div class="card-body d-flex flex-column">
                               <h6 class="card-title mb-1"><?php echo $nome; ?></h6>
                               <p class="text-muted mb-2 small"><?php echo $cat; ?></p>
-                              <div class="mt-auto">
+                              <div class="mt-auto d-flex justify-content-between align-items-center">
                                 <span class="font-weight-bold">R$ <?php echo $preco; ?></span>
+                                <span class="badge badge-success">Ativo</span>
                               </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Modal de Edição -->
+                        <div class="modal fade" id="editModal<?php echo $idProduto; ?>" tabindex="-1" role="dialog" 
+                             aria-labelledby="editModalLabel<?php echo $idProduto; ?>" aria-hidden="true">
+                          <div class="modal-dialog modal-lg" role="document">
+                            <div class="modal-content">
+                              <form method="POST" enctype="multipart/form-data">
+                                <input type="hidden" name="acao" value="atualizar-produto">
+                                <input type="hidden" name="id_produto" value="<?php echo $idProduto; ?>">
+                                <div class="modal-header bg-primary text-white">
+                                  <h5 class="modal-title" id="editModalLabel<?php echo $idProduto; ?>">
+                                    <i class="fas fa-edit mr-2"></i> Editar Produto
+                                  </h5>
+                                  <button type="button" class="close text-white" data-dismiss="modal" aria-label="Fechar">
+                                    <span aria-hidden="true">&times;</span>
+                                  </button>
+                                </div>
+                                <div class="modal-body">
+                                  <div class="row">
+                                    <div class="col-md-8">
+                                      <div class="form-group">
+                                        <label for="nome<?php echo $idProduto; ?>">Nome do Produto *</label>
+                                        <input type="text" class="form-control" id="nome<?php echo $idProduto; ?>" 
+                                               name="nome_produto" value="<?php echo $nome; ?>" required>
+                                      </div>
+                                      
+                                      <div class="row">
+                                        <div class="col-md-6">
+                                          <div class="form-group">
+                                            <label for="preco<?php echo $idProduto; ?>">Preço de Venda *</label>
+                                            <div class="input-group">
+                                              <div class="input-group-prepend">
+                                                <span class="input-group-text">R$</span>
+                                              </div>
+                                              <input type="number" class="form-control" id="preco<?php echo $idProduto; ?>" 
+                                                     name="preco_venda" step="0.01" min="0" 
+                                                     value="<?php echo $p->preco_venda ?? 0; ?>" required>
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                          <div class="form-group">
+                                            <label for="categoria<?php echo $idProduto; ?>">Categoria</label>
+                                            <select class="form-control" id="categoria<?php echo $idProduto; ?>" name="id_categoria">
+                                              <option value="">Selecione uma categoria</option>
+                                              <?php
+                                                // Buscar categorias disponíveis
+                                                try {
+                                                  $sqlCategorias = "SELECT id_categoria, nome_categoria FROM tb_categorias WHERE status = 'ativo' ORDER BY nome_categoria";
+                                                  $stmtCategorias = $conect->query($sqlCategorias);
+                                                  $categorias = $stmtCategorias->fetchAll(PDO::FETCH_OBJ);
+                                                  foreach ($categorias as $categoria) {
+                                                    $selected = ($categoria->id_categoria == $p->id_categoria) ? 'selected' : '';
+                                                    echo '<option value="' . $categoria->id_categoria . '" ' . $selected . '>' 
+                                                         . htmlspecialchars($categoria->nome_categoria) . '</option>';
+                                                  }
+                                                } catch (Exception $e) {
+                                                  echo '<option value="">Erro ao carregar categorias</option>';
+                                                }
+                                              ?>
+                                            </select>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      
+                                      <div class="form-group">
+                                        <label for="descricao<?php echo $idProduto; ?>">Descrição</label>
+                                        <textarea class="form-control" id="descricao<?php echo $idProduto; ?>" 
+                                                  name="descricao_produto" rows="3"><?php echo htmlspecialchars($p->descricao_produto ?? ''); ?></textarea>
+                                      </div>
+                                    </div>
+                                    
+                                    <div class="col-md-4">
+                                      <div class="form-group text-center">
+                                        <label>Foto Atual</label>
+                                        <div class="mb-3">
+                                          <img src="<?php echo $foto; ?>" class="img-thumbnail" alt="Foto atual" 
+                                               style="max-height:150px; object-fit:cover;"
+                                               onerror="this.onerror=null;this.src='<?php echo htmlspecialchars($avatarFallback); ?>'">
+                                        </div>
+                                        <label for="novaFoto<?php echo $idProduto; ?>">Alterar Foto</label>
+                                        <div class="custom-file">
+                                          <input type="file" class="custom-file-input" id="novaFoto<?php echo $idProduto; ?>" 
+                                                 name="foto_produto" accept="image/*">
+                                          <label class="custom-file-label" for="novaFoto<?php echo $idProduto; ?>">Escolher arquivo</label>
+                                        </div>
+                                        <small class="form-text text-muted">Deixe em branco para manter a foto atual</small>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="modal-footer">
+                                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                  <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save mr-2"></i> Salvar Alterações
+                                  </button>
+                                </div>
+                              </form>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Modal de Exclusão -->
+                        <div class="modal fade" id="deleteModal<?php echo $idProduto; ?>" tabindex="-1" role="dialog" 
+                             aria-labelledby="deleteModalLabel<?php echo $idProduto; ?>" aria-hidden="true">
+                          <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                              <form method="POST">
+                                <input type="hidden" name="acao" value="excluir-produto">
+                                <input type="hidden" name="id_produto" value="<?php echo $idProduto; ?>">
+                                <div class="modal-header bg-danger text-white">
+                                  <h5 class="modal-title" id="deleteModalLabel<?php echo $idProduto; ?>">
+                                    <i class="fas fa-trash mr-2"></i> Confirmar Exclusão
+                                  </h5>
+                                  <button type="button" class="close text-white" data-dismiss="modal" aria-label="Fechar">
+                                    <span aria-hidden="true">&times;</span>
+                                  </button>
+                                </div>
+                                <div class="modal-body">
+                                  <div class="text-center mb-3">
+                                    <i class="fas fa-exclamation-triangle fa-3x text-warning"></i>
+                                  </div>
+                                  <h5 class="text-center">Tem certeza que deseja excluir este produto?</h5>
+                                  <p class="text-center">
+                                    <strong><?php echo $nome; ?></strong><br>
+                                    <small class="text-muted">Esta ação não pode ser desfeita</small>
+                                  </p>
+                                  <div class="alert alert-warning">
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                    O produto será marcado como inativo e não aparecerá mais no catálogo.
+                                  </div>
+                                </div>
+                                <div class="modal-footer">
+                                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                  <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-trash mr-2"></i> Sim, Excluir Produto
+                                  </button>
+                                </div>
+                              </form>
                             </div>
                           </div>
                         </div>
@@ -424,28 +629,38 @@ if (isset($_GET['export'])) {
                 })();
                 </script>
 
-                <div class="col-lg-12 d-flex justify-content-center">
-                  <?php
-                    // preserva query string atual (ex.: acao=relatorio) e adiciona export
-                    $curQuery = $_SERVER['QUERY_STRING'] ?? '';
-                    parse_str($curQuery, $curParams);
-                    // função simples para montar URL de export mantendo os outros params
-                    $exportUrl = function($name) use ($curParams) {
-                        $p = $curParams;
-                        $p['export'] = $name;
-                        // aponta para home.php que agora intercepta export e inclui este arquivo antes do header
-                        return 'home.php?' . http_build_query($p);
-                    };
-                  ?>
-                  <!-- Export buttons -->
-                  <div class="btn-group" role="group" aria-label="exports">
-                    <a href="<?php echo htmlspecialchars($exportUrl('csv')); ?>" class="btn btn-outline-secondary">CSV</a>
-                    <a href="<?php echo htmlspecialchars($exportUrl('xls')); ?>" class="btn btn-outline-secondary">XLS</a>
-                    <a href="<?php echo htmlspecialchars($exportUrl('json')); ?>" class="btn btn-outline-secondary">JSON</a>
-                    <a href="<?php echo htmlspecialchars($exportUrl('print')); ?>" target="_blank" class="btn btn-outline-secondary">Imprimir / PDF</a>
-                  </div>
-                 </div>
-                </div>
-              <!-- /.card-body -->
-            </div>
-            <!-- /.card -->
+                <!-- Script para custom file input e validação -->
+                <script>
+                // Atualizar label do file input
+                document.querySelectorAll('.custom-file-input').forEach(function(input) {
+                  input.addEventListener('change', function(e) {
+                    var fileName = e.target.files[0] ? e.target.files[0].name : 'Escolher arquivo';
+                    var label = e.target.nextElementSibling;
+                    label.textContent = fileName;
+                  });
+                });
+
+                // Prevenir envio do formulário se houver erro
+                document.querySelectorAll('form').forEach(function(form) {
+                  form.addEventListener('submit', function(e) {
+                    var required = form.querySelectorAll('[required]');
+                    var valid = true;
+                    
+                    required.forEach(function(field) {
+                      if (!field.value.trim()) {
+                        valid = false;
+                        field.classList.add('is-invalid');
+                      } else {
+                        field.classList.remove('is-invalid');
+                      }
+                    });
+                    
+                    if (!valid) {
+                      e.preventDefault();
+                      alert('Por favor, preencha todos os campos obrigatórios.');
+                    }
+                  });
+                });
+                </script>
+
+                <div class="col-lg-12 d-flex justify

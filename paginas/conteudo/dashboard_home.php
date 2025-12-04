@@ -156,32 +156,6 @@ $foto_user_dashboard = isset($_SESSION['foto']) && !empty($_SESSION['foto']) ? $
             </div>
         </div>
 
-        <!-- Produtos Recentes com Ações (Editar / Deletar) -->
-        <div class="stats-section">
-            <h2 class="stats-title"><i class="fas fa-clock mr-3" style="color: #2C5AA0;"></i>Produtos Recentes</h2>
-            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:16px;">
-                <?php if (count($produtosRecentes) === 0): ?>
-                    <div style="padding:20px; border-radius:12px; background:#fff; box-shadow:var(--shadow-soft);">Nenhum produto cadastrado ainda.</div>
-                <?php else: ?>
-                    <?php foreach ($produtosRecentes as $p): ?>
-                        <div style="display:flex; gap:12px; align-items:center; padding:12px; border-radius:12px; background:#fff; box-shadow:var(--shadow-soft);">
-                            <div style="width:64px; height:64px; border-radius:8px; overflow:hidden; flex-shrink:0; background:#f4f6f8; display:flex; align-items:center; justify-content:center;">
-                                <img src="<?= '../img/prod/' . ($p['foto_produto'] ?: 'produto-sem-foto.jpg') ?>" alt="" style="width:100%; height:100%; object-fit:cover;">
-                            </div>
-                            <div style="flex:1;">
-                                <div style="font-weight:700; color:var(--text-dark);"><?= htmlspecialchars($p['nome_produto']) ?></div>
-                                <div style="font-size:0.9rem; color:var(--text-light);">Estoque: <?= (int)$p['estoque'] ?> • R$ <?= number_format($p['preco_venda'],2,',','.') ?></div>
-                            </div>
-                            <div style="display:flex; gap:8px;">
-                                <a href="home.php?acao=editar_produto&id=<?= $p['id_produto'] ?>" class="card-button" style="padding:8px 10px; font-size:0.85rem; background:#6c757d;">Editar</a>
-                                <a href="conteudo/del-produto.php?idDel=<?= $p['id_produto'] ?>" onclick="return confirm('Confirmar exclusão deste produto?');" class="card-button" style="padding:8px 10px; font-size:0.85rem; background: #ff6b6b;">Deletar</a>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </div>
-        </div>
-
         <!-- Informações Úteis -->
         <div class="stats-section">
             <h2 class="stats-title">

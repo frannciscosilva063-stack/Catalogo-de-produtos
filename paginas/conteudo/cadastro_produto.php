@@ -6,7 +6,7 @@
 
 // Verificar se usuário está logado
 if (!isset($_SESSION['id_user'])) {
-    header("Location: ../../login.php");
+    header("Location: ../index.php");
     exit;
 }
 
@@ -45,7 +45,7 @@ if (isset($_GET['acao']) && $_GET['acao'] === 'excluir_produto' && isset($_GET['
 
                 $conect->commit();
 
-                // remove arquivo de imagem se existir e não for imagem padrão
+                
                 if (!empty($prod->foto_produto) && $prod->foto_produto !== 'produto-sem-foto.jpg') {
                     $file = __DIR__ . '/../../img/produtos/' . $prod->foto_produto;
                     if (file_exists($file)) {
@@ -292,8 +292,15 @@ if (isset($_GET['acao']) && $_GET['acao'] === 'excluir_produto' && isset($_GET['
                                         <button type="button" class="close" data-dismiss="alert">×</button>
                                         <i class="fas fa-check-circle"></i> Produto cadastrado com sucesso!
                                       </div>';
-                                // Redireciona para mesma página para limpar o formulário
-                                echo '<script>setTimeout(() => { window.location.reload(); }, 1500);</script>';
+                                // PRG: redireciona via GET para evitar reenvio do formulário (usa replace para não adicionar ao histórico)
+                                $redirect = htmlspecialchars($_SERVER['SCRIPT_NAME'] . '?acao=bemvindo');
+                                echo '<script>
+                                        (function(){
+                                            var btn = document.querySelector("button[name=cadastrar]");
+                                            if (btn) { btn.disabled = true; btn.innerHTML = "<i class=\"fas fa-spinner fa-spin\"></i> Processando..."; }
+                                            setTimeout(function(){ window.location.replace("'.$redirect.'"); }, 900);
+                                        })();
+                                      </script>';
 
                             } catch (Exception $e) {
                                 $conect->rollBack();
@@ -375,7 +382,7 @@ if (isset($_GET['acao']) && $_GET['acao'] === 'excluir_produto' && isset($_GET['
                                                              style="width:45px;height:45px;object-fit:cover;"
                                                             
                                                              
-                                                             onerror="this.src='../img/avatar_p/avatar-padrao.png'">
+                                                             onerror="this.src='../img/img_padrao/img.jpeg'">
                                                     </td>
                                                     <td>
                                                         <strong><?= htmlspecialchars($p->nome_produto) ?></strong>
