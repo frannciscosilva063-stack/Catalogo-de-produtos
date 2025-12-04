@@ -5,7 +5,7 @@ if (!defined('DB_CONFIG')) {
         'host' => 'localhost',
         'dbname' => 'bd_loja',
         'user' => 'root',
-        'pass' => 'admin'
+        'pass' => 'bdjmf'
     ]);
 }
 

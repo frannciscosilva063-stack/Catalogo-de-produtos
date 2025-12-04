@@ -1,0 +1,24 @@
+# Ignorar arquivos de build
+.dist/
+
+# Ignorar plugins de terceiros (se não quiser versionar)
+plugins/
+
+# Ignorar pacotes baixados
+fpdf186.tgz
+fpdf186.zip
+
+# Ignorar backups de banco
+new_agenda.sql
+
+# Ignorar configs sensíveis
+config/
+
+# Ignorar imagens enviadas por usuários
+# (mas manter imagens que fazem parte do projeto)
+img/
+
+# NÃO ignorar código-fonte
+!includes/
+!loja/
+!paginas/

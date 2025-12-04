@@ -1,14 +1,23 @@
-# Catálogo de Produtos
+# Catálogo de produtos
 
 ![PHP](https://img.shields.io/badge/PHP-8.2-blue?logo=php&logoColor=white) ![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white) ![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white) ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black) ![MySQL](https://img.shields.io/badge/MySQL-4479A1?logo=mysql&logoColor=white) ![WAMP](https://img.shields.io/badge/WAMP-0078D7?logo=wampserver&logoColor=white) ![XAMPP](https://img.shields.io/badge/XAMPP-F0DB4F?logo=xampp&logoColor=black) ![MIT License](https://img.shields.io/badge/License-MIT-green)
 
 Sistema de catálogo de produtos — permite organizar, cadastrar e visualizar produtos com interface web, ideal para lojas online ou controle de estoque. Este projeto é desenvolvido para facilitar a criação, organização e visualização de um inventário de produtos, permitindo adicionar, listar e visualizar produtos de forma simples.
 
-## Tecnologias
-PHP 8.x, HTML5, CSS3, JavaScript, Banco de dados MySQL (opcional), Servidor Local: WAMP, XAMPP, LAMP ou MAMP.
+## 🧪 Tecnologias
+- PHP 8.x  
+- HTML5, CSS3, JavaScript  
+- MySQL (opcional)  
+- Servidor Local (WAMP, XAMPP, LAMP, MAMP)
 
-## Pré-requisitos
-Navegador web moderno, Servidor local PHP (WAMP, XAMPP, LAMP ou MAMP), MySQL (opcional).
+---
+
+## ✅ Pré-requisitos
+- Navegador web moderno  
+- Servidor local com PHP  
+- Banco de dados MySQL (se necessário)
+
+---
 
 ## Instalação do Servidor Local
 Para rodar o projeto, instale um servidor local:
@@ -33,7 +42,33 @@ Visualização de produtos, Cadastro de novos produtos via formulário, Organiza
 config/ → configurações do sistema, dist/ → arquivos gerados, img/ → imagens do site e produtos, includes/ → componentes PHP reutilizáveis, loja/ → lógica do catálogo, paginas/ → páginas do site, plugins/ → bibliotecas externas.
 
 ## Demonstração
-Adicione prints ou GIFs mostrando a interface de produtos e o cadastro funcionando.
+...
+
+## Status e badges shields
+![Status](https://img.shields.io/badge/status-em%20desenvolvimento-yellow)
+![Contribuições](https://img.shields.io/badge/contribuições-bem_vindas-brightgreen)
+![Versão](https://img.shields.io/badge/versão-1.0.0-blue)
+
+
+## Linguagens
+![PHP](https://img.shields.io/badge/PHP-777BB4?logo=php&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)
+![HTML](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white)
+![CSS](https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white)
+
+## Formatações avançadas
+✔ Checklists
+- [x] Funcionalidade implementada
+- [ ] Aguardando melhorias
+🔽 Dropdowns (detalhes)
+<details>
+  <summary>Ver mais</summary>
+  Conteúdo interno…
+</details>
+🧱 Tabelas
+| Produto | Preço | Estoque |
+|--------|-------|---------|
+| Camisa | R$50  | 12      |
 
 ## Contribuição
 Faça um fork do projeto, crie uma branch: `git checkout -b feature/nova-feature`, commit: `git commit -m "Descrição da alteração"`, push: `git push origin feature/nova-feature`, abra um Pull Request.
@@ -43,3 +78,12 @@ Este projeto está sob a licença MIT.
 
 ## 📄 Licença
 Este projeto está sob a licença MIT.
+
+---
+
+## Contribuição e contato
+-> 
+ Atualmente estou aberto para oportunidades como Desenvolvedor. Se você precisa de alguém para transformar ideias para realidades responsivas e funcionais, podemos trabalhar!
+ 
+📬 Entre em contato:
+📧 francisco.santos3079@aluno.ce.gov.br
